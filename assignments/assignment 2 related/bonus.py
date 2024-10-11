@@ -9,10 +9,11 @@ def get_top_and_bottom(hotels: list[Hotel], sorting_order: bool) -> list[tuple[s
 
     for hotel in hotels:
         review_scores = [review.score for review in hotel.reviews]
-        mean_score = round(statistics.mean(review_scores), 1)
+        mean_score = round(statistics.median(review_scores), 1)
         hotel_m_scores.append((hotel.name, mean_score))
 
-    top_10 = sorted(hotel_m_scores, key=lambda hotel_m_score: hotel_m_score[1], reverse=True)[:10]
-    bottom_10 = sorted(hotel_m_scores, key=lambda hotel_m_score: hotel_m_score[1], reverse=False)[:10]
+    hotel_m_scores_sorted = sorted(hotel_m_scores, key=lambda hotel_m_score: hotel_m_score[1], reverse=True)
+    top_10 = hotel_m_scores_sorted[:10]
+    bottom_10 = hotel_m_scores_sorted[-10:]
 
     return bottom_10 if sorting_order else top_10
