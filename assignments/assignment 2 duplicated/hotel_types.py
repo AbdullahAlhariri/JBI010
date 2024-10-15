@@ -237,7 +237,7 @@ def highest_nationalities_average_score(booking: Booking) -> str:
 
 
 # // BEGIN_TODO [Task 6] Check score improvement
-def check_improvement(hotels: list[Hotel]) -> dict[str, tuple]:
+def check_improvement(self) -> dict[str, tuple]:
     """
     Checks every hotel given as param if it's reviews score in the second half has been improved compared to the first one by taking the mean. And returning the results.
 
@@ -245,7 +245,7 @@ def check_improvement(hotels: list[Hotel]) -> dict[str, tuple]:
     :returns: Returns a dict with hotel name(str) as key and first and second half mean and whether the second half has been an improvements over the fist one all as a value (tuple).
     """
     output_dict: dict = {}
-    for hotel in hotels:
+    for hotel in self.hotels:
         reviews: list = sorted(hotel.reviews, key=lambda review: review.days_rev, reverse=True)
         half_point: int = round(len(reviews) / 2)
 
@@ -260,6 +260,8 @@ def check_improvement(hotels: list[Hotel]) -> dict[str, tuple]:
         output_dict[hotel.name] = (reviews_first_half_mean, reviews_second_half_mean, hotel.improved)
 
     return output_dict
+
+Booking.check_improvement = check_improvement # From canvas:  In task 6), check_improvement() should be a method of the Booking class, not a function.
 # // END_TODO [Task 6]
 
 
@@ -285,6 +287,6 @@ def get_top_and_bottom(hotels: list[Hotel], sorting_order: bool) -> list[tuple[s
     return bottom_10 if sorting_order else top_10
 # // END_TODO [Bonus task]
 
-        
+
 booking = Booking([], [])
 booking.read_csv("data/Hotel_Reviews_EU.csv")
