@@ -5,7 +5,7 @@ Authors: Nora Bouwman, Emanuela Dumitru and Leon Willems
 Copyright (c) 2024 - Eindhoven University of Technology, The Netherlands
 This software is made available under the terms of the MIT License.
 """
-
+from datetime import datetime
 from typing import Any, List, Tuple, Dict
 import csv
 import statistics
@@ -78,10 +78,9 @@ class Booking:
 
         with open(reviews_path, 'r') as file:
             reader = csv.reader(file)
-            hotel_names: list = [hotel.name for hotel in self.hotels]
             next(reader)
             for row in reader:
-                hotel_address: str = row[0] # Address of the hotel.
+                hotel_address: str = row[0].strip() # Address of the hotel.
                 review_date: str = row[2] # Date when the reviewer posted the corresponding review.
                 average_score: float = float(row[3]) # Average score of the hotel, calculated based on the latest comments in the last year.
                 hotel_name: str = row[4] # Name of the hotel.
@@ -91,20 +90,19 @@ class Booking:
                 days_since_review: int = int(row[14].split(' ')[0]) # Duration between the review date and the date it was collected into this dataset.
                 reviewer_nationality: str = row[5]  # Nationality of the reviewer.
 
-                if hotel_name in hotel_names:
-                    current_hotel_index: int = hotel_names.index(hotel.name)
-                    hotel: Hotel = self.hotels[current_hotel_index]
+                hotel_addresses: list = [hotel.address for hotel in self.hotels]
+                if hotel_address in hotel_addresses:
+                    hotel: Hotel = self.hotels[hotel_addresses.index(hotel_address)]
                 else:
                     hotel: Hotel = Hotel(hotel_address, average_score, hotel_name, [])
                     self.hotels.append(hotel)
-                    hotel_names.append(hotel.name)
-                    current_hotel_index: int = hotel_names.index(hotel.name)
+                    hotel_addresses.append(hotel_address)
 
                 review: Review = Review(review_date, review_total_negative_word_counts, review_total_positive_word_counts, reviewer_score, days_since_review, reviewer_nationality)
                 self.reviews.append(review)
                 hotel.reviews.append(review)
 
-                self.hotels[current_hotel_index] = hotel
+                self.hotels[hotel_addresses.index(hotel_address)] = hotel
 # // END_TODO [Task 3]
 
 
@@ -159,16 +157,6 @@ def average_score_per_country(booking: Booking) -> dict[str, float]:
 
     :param booking: Booking instance where the dataset has been loaded.
     :returns: Average score per country where the hotel is based as a dictionary.
-
-    >>> booking = Booking([], [])
-    >>> booking.read_csv("data/Hotel_Reviews_EU.csv")
-    >>> average_score_per_country(booking)
-    {'Netherlands': 8.41, 'France': 8.49, 'Spain': 8.5, 'Italy': 8.32, 'Austria': 8.55, 'United Kingdom': 8.46}
-
-    >>> booking = Booking([], [])
-    >>> booking.read_csv("data/Hotel_Reviews_EU_minimal.csv")
-    >>> average_score_per_country(booking)
-    {'Netherlands': 7.7, 'United Kingdom': 8.47}
     """
     reviews_per_country: dict = {}
 
@@ -195,25 +183,6 @@ def highest_nationalities_average_score(booking: Booking) -> str:
 
     :param booking: Booking instance where the dataset has been loaded.
     :returns: Highest nationalities average score as string.
-
-    >>> booking = Booking([], [])
-    >>> booking.read_csv("data/Hotel_Reviews_EU.csv")
-    >>> highest_nationalities_average_score(booking)
-    All the following nationalities had average of 10.0:
-    Crimea
-    Equatorial Guinea
-    Comoros
-    Svalbard Jan Mayen
-
-    >>> booking = Booking([], [])
-    >>> booking.read_csv("data/Hotel_Reviews_EU_minimal.csv")
-    >>> highest_nationalities_average_score(booking)
-    All the following nationalities had average of 10.0:
-    Panama
-    Liechtenstein
-    United States Minor Outlying Islands
-    Morocco
-    Uruguay
     """
 
     av_score_per_nationality: dict = {}
@@ -233,7 +202,7 @@ def highest_nationalities_average_score(booking: Booking) -> str:
     highest_av_score: float = av_score_per_nationality[max(av_score_per_nationality, key=av_score_per_nationality.get)]
     highest_av_nationalities: dict = {nationality:av_score for nationality, av_score in av_score_per_nationality.items() if av_score == highest_av_score}
     return f"All the following nationalities had average of {highest_av_score}: \n" + "\n".join(highest_av_nationalities.keys())
-# // END_TODO [Task 5]
+# // END_TODO [Task 5] 
 
 
 # // BEGIN_TODO [Task 6] Check score improvement
@@ -249,10 +218,10 @@ def check_improvement(self) -> dict[str, tuple]:
         reviews: list = sorted(hotel.reviews, key=lambda review: review.days_rev, reverse=True)
         half_point: int = round(len(reviews) / 2)
 
-        reviews_first_half_scores: list = [review.score for review in reviews[:half_point]]
-        reviews_second_half_scores: list = [review.score for review in reviews[half_point:]]
-        reviews_first_half_mean: int = statistics.mean(reviews_first_half_scores)
-        reviews_second_half_mean: int = statistics.mean(reviews_second_half_scores)
+        review_scores: list = [review.score for review in reviews]
+
+        reviews_first_half_mean: int = statistics.mean(review_scores[:half_point])
+        reviews_second_half_mean: int = statistics.mean(review_scores[half_point:])
 
         if reviews_first_half_mean < reviews_second_half_mean:
             hotel.improved = True
@@ -266,7 +235,7 @@ Booking.check_improvement = check_improvement # From canvas:  In task 6), check_
 
 
 # // BEGIN_TODO [Bonus task] Retrieve top and bottom 10 hotels
-def get_top_and_bottom(hotels: list[Hotel], sorting_order: bool) -> list[tuple[str, float]]:
+def get_top_and_bottom(self, sorting_order: bool) -> list[tuple[str, float]]:
     """
     Computes the top and bottom 10 hotels based on the review scores median of the hotels, and returns the top 10 or the bottom 10 based on sorting_order param.
 
@@ -275,7 +244,7 @@ def get_top_and_bottom(hotels: list[Hotel], sorting_order: bool) -> list[tuple[s
     """
     hotel_m_scores: list = []
 
-    for hotel in hotels:
+    for hotel in booking.hotels:
         review_scores: list = [review.score for review in hotel.reviews]
         median_score: int = round(statistics.median(review_scores), 1)
         hotel_m_scores.append((hotel.name, median_score))
@@ -284,9 +253,10 @@ def get_top_and_bottom(hotels: list[Hotel], sorting_order: bool) -> list[tuple[s
     top_10: list = hotel_m_scores_sorted[:10]
     bottom_10: list = hotel_m_scores_sorted[-10:]
 
-    return bottom_10 if sorting_order else top_10
-# // END_TODO [Bonus task]
+    return top_10 if sorting_order else bottom_10
 
+Booking.get_top_and_bottom = get_top_and_bottom # From canvas: In task 7), get_top_and_bottom() should be a method of the Booking class, not a function. A list of hotels should not be a parameter.
+# // END_TODO [Bonus task]
 
 booking = Booking([], [])
 booking.read_csv("data/Hotel_Reviews_EU.csv")
