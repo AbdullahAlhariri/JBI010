@@ -102,23 +102,23 @@ def test_get_top_and_bottom_bottom(hotels_and_reviews):
     assert all(value < 7 for _, value in output), msg_bottom_incorrect
 
 def test_average_score_per_country(hotels_and_reviews):
-    booking_instance = hotels_and_reviews
-    output = average_score_per_country(booking_instance)
+    booking_instance: Booking = hotels_and_reviews
+    output: dict[str, float] = average_score_per_country(booking_instance)
 
-    msg_len_output = 'Your output dict has too many or little entries!'
-    msg_values_output = 'Your output values aren\'t correct'
+    msg_len_output: str = 'Your output dict has too many or little entries!'
+    msg_values_output: str = 'Your output values aren\'t correct'
 
     assert len(output.values()) == 6, msg_len_output
     assert sum(output.values()) == 50.73, msg_values_output
 
 
 def test_highest_nationalities_average_score(hotels_and_reviews):
-    booking_instance = hotels_and_reviews
-    output = highest_nationalities_average_score(booking_instance)
+    booking_instance: Booking = hotels_and_reviews
+    output: str = highest_nationalities_average_score(booking_instance)
     lines: list = output.split("\n")
 
-    msg_average_output = 'Your output average is not correct'
-    msg_len_output = 'Your output list is too short or is too long'
+    msg_average_output: str = 'Your output average is not correct'
+    msg_len_output: str = 'Your output list is too short or is too long'
 
     assert float(lines[0][47:-2]) == 10.0, msg_average_output
     assert len(lines)-1 == 4, msg_len_output

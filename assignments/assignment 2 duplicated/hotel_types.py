@@ -113,10 +113,10 @@ def perform_eda(self) -> dict[str,list]:
 
     :returns: The mean, median, and std computed of all the neg_words, pos_words, score, and days_rev attributes of review class.
     """
-    neg_words = [review.neg_words for review in self.reviews]
-    pos_words = [review.pos_words for review in self.reviews]
-    score = [review.score for review in self.reviews]
-    days_rev = [review.days_rev for review in self.reviews]
+    neg_words: list[int] = [review.neg_words for review in self.reviews]
+    pos_words: list[int] = [review.pos_words for review in self.reviews]
+    score: list[float] = [review.score for review in self.reviews]
+    days_rev: list[int] = [review.days_rev for review in self.reviews]
 
     output_dict: dict[str,list] = {
         "neg_words": [len(neg_words), {
@@ -202,7 +202,7 @@ def highest_nationalities_average_score(booking: Booking) -> str:
     highest_av_score: float = av_score_per_nationality[max(av_score_per_nationality, key=av_score_per_nationality.get)]
     highest_av_nationalities: dict = {nationality:av_score for nationality, av_score in av_score_per_nationality.items() if av_score == highest_av_score}
     return f"All the following nationalities had average of {highest_av_score}: \n" + "\n".join(highest_av_nationalities.keys())
-# // END_TODO [Task 5] 
+# // END_TODO [Task 5]
 
 
 # // BEGIN_TODO [Task 6] Check score improvement
@@ -220,8 +220,8 @@ def check_improvement(self) -> dict[str, tuple]:
 
         review_scores: list = [review.score for review in reviews]
 
-        reviews_first_half_mean: int = statistics.mean(review_scores[:half_point])
-        reviews_second_half_mean: int = statistics.mean(review_scores[half_point:])
+        reviews_first_half_mean: int = round(statistics.mean(review_scores[:half_point]), 3)
+        reviews_second_half_mean: int = round(statistics.mean(review_scores[half_point:]), 3)
 
         if reviews_first_half_mean < reviews_second_half_mean:
             hotel.improved = True
